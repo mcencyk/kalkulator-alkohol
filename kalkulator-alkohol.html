@@ -446,11 +446,19 @@ function App() {
           </div>
           <div className="field">
             <label>Plec</label>
-            <div className="gender-btns">
-              <button className={`gender-btn ${gender === 'male' ? 'active' : ''}`}
-                onClick={() => setGender('male')}>Mezczyzna</button>
-              <button className={`gender-btn ${gender === 'female' ? 'active' : ''}`}
-                onClick={() => setGender('female')}>Kobieta</button>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {[
+                { val: 'male',   emoji: '👨', label: 'Mężczyzna' },
+                { val: 'female', emoji: '👩', label: 'Kobieta' },
+              ].map(g => (
+                <div key={g.val}
+                  className={`drink-card ${gender === g.val ? 'active' : ''}`}
+                  onClick={() => setGender(g.val)}
+                >
+                  <span className="drink-emoji">{g.emoji}</span>
+                  <span className="drink-name">{g.label}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -495,22 +503,22 @@ function App() {
       {/* Jedzenie */}
       <div className="card">
         <h2>Jedzenie</h2>
-        <div className="gender-btns" style={{ flexWrap: 'wrap' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
           {[
-            { val: 'none',  label: 'Pusty zoladek', desc: '100%' },
-            { val: 'snack', label: 'Przekaska',      desc: '-15%' },
-            { val: 'meal',  label: 'Normalny posilek', desc: '-30%' },
-            { val: 'heavy', label: 'Obfity posilek', desc: '-40%' },
+            { val: 'none',  emoji: '🫙', label: 'Pusty żołądek', desc: '100%' },
+            { val: 'snack', emoji: '🥨', label: 'Przekąska',     desc: '-15%' },
+            { val: 'meal',  emoji: '🍱', label: 'Posiłek',       desc: '-30%' },
+            { val: 'heavy', emoji: '🥩', label: 'Obfity',        desc: '-40%' },
           ].map(f => (
-            <button
+            <div
               key={f.val}
-              className={`gender-btn ${food === f.val ? 'active' : ''}`}
-              style={{ minWidth: 120 }}
+              className={`drink-card ${food === f.val ? 'active' : ''}`}
               onClick={() => setFood(f.val)}
             >
-              {f.label}
-              <span style={{ display: 'block', fontSize: '0.7rem', opacity: 0.7, marginTop: 2 }}>{f.desc} wchłaniania</span>
-            </button>
+              <span className="drink-emoji">{f.emoji}</span>
+              <span className="drink-name">{f.label}</span>
+              <span className="drink-sub">{f.desc}</span>
+            </div>
           ))}
         </div>
       </div>
