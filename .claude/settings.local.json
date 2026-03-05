@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/kalkulator-alkohol.html)",
+      "Bash(open http://localhost:8080/kalkulator-alkohol.html)",
+      "Bash(git --version)",
+      "Bash(gh --version)",
+      "Bash(gh auth status)",
+      "Bash(brew --version)",
+      "Bash(curl -sS https://webi.sh/gh)",
+      "Bash(sh)",
+      "Bash(source ~/.config/envman/PATH.env)",
+      "Bash(gh auth login)",
+      "Bash(git init)",
+      "Bash(git add kalkulator-alkohol.html)",
+      "Bash(git commit -m \"Add alcohol BAC calculator with Widmark formula\")",
+      "Bash(gh api user --jq '.email, .login, .name')",
+      "Bash(git config user.name \"mcencyk\")",
+      "Bash(git config user.email \"mcencyk@users.noreply.github.com\")",
+      "Bash(gh repo create kalkulator-alkohol --public --source=. --remote=origin --push)",
+      "Bash(gh api repos/mcencyk/kalkulator-alkohol/pages -X POST -f source='{\"\"branch\"\":\"\"main\"\",\"\"path\"\":\"\"/\"\"}')",
+      "Bash(gh api:*)",
+      "Bash(git add index.html)",
+      "Bash(git commit -m \"Add index.html for GitHub Pages\")",
+      "Bash(git push)",
+      "Bash(git add kalkulator-alkohol.html index.html logo.svg)",
+      "Bash(git commit -m \"Add logo with gear spin animation and favicon\")",
+      "Bash(git add kalkulator-alkohol.html index.html)",
+      "Bash(git commit -m \"Align logo and title horizontally\")",
+      "Bash(git commit -m \"Replace drink dropdowns with icon card grid\")",
+      "Bash(git commit -m \"Make result panel sticky side column\")",
+      "Bash(git commit -m \"Replace time input with styled range slider\")"
+    ]
+  }
+}
