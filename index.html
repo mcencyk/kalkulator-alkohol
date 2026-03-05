@@ -100,43 +100,50 @@
       border-color: #3b82f6;
       color: #fff;
     }
-    .drink-row {
-      display: flex;
+    .drink-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
       gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
     }
-    .drink-row select {
-      flex: 2;
-    }
-    .drink-row input {
-      flex: 1;
-      min-width: 60px;
-    }
-    .btn-remove {
-      background: #7f1d1d;
-      border: none;
-      border-radius: 6px;
-      color: #fca5a5;
+    .drink-card {
+      position: relative;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 12px 6px 8px;
       cursor: pointer;
-      padding: 10px 12px;
-      font-size: 0.875rem;
-      transition: background 0.15s;
+      text-align: center;
+      transition: all 0.15s;
+      user-select: none;
     }
-    .btn-remove:hover { background: #991b1b; }
-    .btn-add {
-      background: #1e3a5f;
-      border: 1px solid #2563eb;
-      border-radius: 8px;
+    .drink-card:hover { border-color: #3b82f6; background: #1e293b; }
+    .drink-card.active { border-color: #3b82f6; background: #1e3a5f; }
+    .drink-emoji { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+    .drink-name { font-size: 0.7rem; font-weight: 600; color: #e2e8f0; display: block; }
+    .drink-sub { font-size: 0.62rem; color: #64748b; display: block; margin-top: 2px; }
+    .drink-badge {
+      position: absolute;
+      top: -7px; right: -7px;
+      background: #3b82f6;
+      color: #fff;
+      border-radius: 99px;
+      min-width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700;
+    }
+    .drink-minus {
+      display: block;
+      margin: 6px auto 0;
+      background: #1e40af;
+      border: none;
+      border-radius: 4px;
       color: #93c5fd;
       cursor: pointer;
-      padding: 9px 16px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      margin-top: 4px;
+      width: 24px; height: 20px;
+      font-size: 1rem; line-height: 1;
       transition: background 0.15s;
     }
-    .btn-add:hover { background: #1d4ed8; color: #fff; }
+    .drink-minus:hover { background: #dc2626; color: #fff; }
 
     .result-panel {
       border-radius: 12px;
@@ -270,16 +277,16 @@
 <script type="text/babel">
 
 const DRINKS = [
-  { label: 'Piwo 500ml (5%)',     ml: 500,  perc: 5   },
-  { label: 'Piwo 330ml (5%)',     ml: 330,  perc: 5   },
-  { label: 'Piwo mocne 500ml (8%)', ml: 500, perc: 8  },
-  { label: 'Wino 150ml (12%)',    ml: 150,  perc: 12  },
-  { label: 'Wino 200ml (13%)',    ml: 200,  perc: 13  },
-  { label: 'Shot wódki 50ml (40%)', ml: 50, perc: 40  },
-  { label: 'Whisky 50ml (40%)',   ml: 50,   perc: 40  },
-  { label: 'Szampan 150ml (11%)', ml: 150,  perc: 11  },
-  { label: 'Nalewka 50ml (35%)', ml: 50,   perc: 35  },
-  { label: 'Inne (wpisz sam)',    ml: 0,    perc: 0, custom: true },
+  { label: 'Piwo',       sub: '500ml · 5%',  ml: 500, perc: 5,  emoji: '🍺' },
+  { label: 'Piwo',       sub: '330ml · 5%',  ml: 330, perc: 5,  emoji: '🫙' },
+  { label: 'Piwo mocne', sub: '500ml · 8%',  ml: 500, perc: 8,  emoji: '🍻' },
+  { label: 'Wino',       sub: '150ml · 12%', ml: 150, perc: 12, emoji: '🍷' },
+  { label: 'Wino',       sub: '200ml · 13%', ml: 200, perc: 13, emoji: '🍾' },
+  { label: 'Wódka',      sub: '50ml · 40%',  ml: 50,  perc: 40, emoji: '🥃' },
+  { label: 'Whisky',     sub: '50ml · 40%',  ml: 50,  perc: 40, emoji: '🫗' },
+  { label: 'Szampan',    sub: '150ml · 11%', ml: 150, perc: 11, emoji: '🥂' },
+  { label: 'Nalewka',    sub: '50ml · 35%',  ml: 50,  perc: 35, emoji: '🍯' },
+  { label: 'Własny',     sub: 'wpisz sam',   ml: 0,   perc: 0,  emoji: '✏️', custom: true },
 ];
 
 const ELIMINATION = 0.15; // ‰ per hour (Widmark typical)
@@ -314,23 +321,33 @@ function barColor(bac) {
   return '#f87171';
 }
 
-let drinkId = 0;
-
 function App() {
   const [weight, setWeight] = React.useState(75);
   const [gender, setGender] = React.useState('male');
   const [drinkingHoursAgo, setDrinkingHoursAgo] = React.useState(0);
   const [food, setFood] = React.useState('none');
-  const [drinks, setDrinks] = React.useState([
-    { id: drinkId++, drinkIdx: 0, qty: 1, customMl: 500, customPerc: 5 }
-  ]);
+  const [drinkCounts, setDrinkCounts] = React.useState({});
+  const [customMl, setCustomMl] = React.useState(500);
+  const [customPerc, setCustomPerc] = React.useState(5);
 
-  const totalGrams = drinks.reduce((sum, d) => {
-    const preset = DRINKS[d.drinkIdx];
-    if (preset.custom) {
-      return sum + calcAlcoholGrams(d.customMl, d.customPerc) * d.qty;
-    }
-    return sum + calcAlcoholGrams(preset.ml, preset.perc) * d.qty;
+  const customIdx = DRINKS.length - 1;
+
+  function addDrink(i) {
+    setDrinkCounts(c => ({ ...c, [i]: (c[i] || 0) + 1 }));
+  }
+  function removeDrink(i) {
+    setDrinkCounts(c => {
+      const next = { ...c, [i]: (c[i] || 0) - 1 };
+      if (next[i] <= 0) delete next[i];
+      return next;
+    });
+  }
+
+  const totalGrams = DRINKS.reduce((sum, drink, i) => {
+    const count = drinkCounts[i] || 0;
+    if (!count) return sum;
+    if (drink.custom) return sum + calcAlcoholGrams(customMl, customPerc) * count;
+    return sum + calcAlcoholGrams(drink.ml, drink.perc) * count;
   }, 0);
 
   const foodFactor = { none: 1.0, snack: 0.85, meal: 0.70, heavy: 0.60 }[food];
@@ -355,16 +372,6 @@ function App() {
     h: i,
     bac: Math.max(0, bac0 - ELIMINATION * (drinkingHoursAgo + i)),
   }));
-
-  function addDrink() {
-    setDrinks(d => [...d, { id: drinkId++, drinkIdx: 0, qty: 1, customMl: 500, customPerc: 5 }]);
-  }
-  function removeDrink(id) {
-    setDrinks(d => d.filter(x => x.id !== id));
-  }
-  function updateDrink(id, field, val) {
-    setDrinks(d => d.map(x => x.id === id ? { ...x, [field]: val } : x));
-  }
 
   return (
     <div className="container">
@@ -407,31 +414,37 @@ function App() {
       {/* Napoje */}
       <div className="card">
         <h2>Wypite napoje</h2>
-        {drinks.map(d => {
-          const preset = DRINKS[d.drinkIdx];
-          return (
-            <div key={d.id} className="drink-row">
-              <select value={d.drinkIdx} onChange={e => updateDrink(d.id, 'drinkIdx', Number(e.target.value))}>
-                {DRINKS.map((dr, i) => <option key={i} value={i}>{dr.label}</option>)}
-              </select>
-              {preset.custom && (
-                <>
-                  <input type="number" placeholder="ml" min="0" value={d.customMl}
-                    onChange={e => updateDrink(d.id, 'customMl', Number(e.target.value))}
-                    style={{ maxWidth: 70 }} />
-                  <input type="number" placeholder="%" min="0" max="100" value={d.customPerc}
-                    onChange={e => updateDrink(d.id, 'customPerc', Number(e.target.value))}
-                    style={{ maxWidth: 60 }} />
-                </>
-              )}
-              <input type="number" min="1" max="20" value={d.qty}
-                onChange={e => updateDrink(d.id, 'qty', Number(e.target.value))}
-                style={{ maxWidth: 64 }} />
-              <button className="btn-remove" onClick={() => removeDrink(d.id)}>X</button>
-            </div>
-          );
-        })}
-        <button className="btn-add" onClick={addDrink}>+ Dodaj napoj</button>
+        <div className="drink-grid">
+          {DRINKS.map((drink, i) => {
+            const count = drinkCounts[i] || 0;
+            return (
+              <div
+                key={i}
+                className={`drink-card ${count > 0 ? 'active' : ''}`}
+                onClick={() => addDrink(i)}
+              >
+                {count > 0 && <span className="drink-badge">{count}</span>}
+                <span className="drink-emoji">{drink.emoji}</span>
+                <span className="drink-name">{drink.label}</span>
+                <span className="drink-sub">{drink.sub}</span>
+                {count > 0 && (
+                  <button className="drink-minus" onClick={e => { e.stopPropagation(); removeDrink(i); }}>−</button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {(drinkCounts[customIdx] || 0) > 0 && (
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8rem', color: '#94a3b8', flexShrink: 0 }}>Własny napój:</span>
+            <input type="number" placeholder="ml" min="0" value={customMl}
+              onChange={e => setCustomMl(Number(e.target.value))}
+              style={{ maxWidth: 80 }} />
+            <input type="number" placeholder="%" min="0" max="100" value={customPerc}
+              onChange={e => setCustomPerc(Number(e.target.value))}
+              style={{ maxWidth: 70 }} />
+          </div>
+        )}
       </div>
 
       {/* Jedzenie */}
