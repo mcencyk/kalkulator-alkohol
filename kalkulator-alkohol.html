@@ -18,8 +18,24 @@
       padding: 24px 16px;
     }
     .container {
-      max-width: 680px;
+      max-width: 1000px;
       margin: 0 auto;
+    }
+    .app-layout {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .app-inputs { flex: 1; min-width: 0; }
+    .app-result {
+      width: 260px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 24px;
+    }
+    @media (max-width: 760px) {
+      .app-layout { flex-direction: column-reverse; }
+      .app-result { width: 100%; position: static; }
     }
     h1 {
       font-size: 1.6rem;
@@ -147,8 +163,7 @@
 
     .result-panel {
       border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 16px;
+      padding: 20px 16px;
       border: 2px solid;
       text-align: center;
     }
@@ -387,6 +402,8 @@ function App() {
         </div>
       </div>
 
+      <div className="app-layout">
+      <div className="app-inputs">
       {/* Dane osoby */}
       <div className="card">
         <h2>Dane osoby</h2>
@@ -485,6 +502,8 @@ function App() {
         </div>
       </div>
 
+      </div>{/* end app-inputs */}
+      <div className="app-result">
       {/* Wynik */}
       <div className={`result-panel ${panelClass}`}>
         <div className="bac-value">{fmt(currentBAC)}</div>
@@ -523,6 +542,9 @@ function App() {
           </div>
         )}
       </div>
+
+      </div>{/* end app-result */}
+      </div>{/* end app-layout */}
 
       <p className="disclaimer">
         Obliczenia oparte na wzorze Widmarka (wspolczynnik eliminacji 0,15 ‰/h).<br/>
