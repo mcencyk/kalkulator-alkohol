@@ -285,6 +285,34 @@
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    .time-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(to right, #3b82f6 0%, #3b82f6 var(--val, 0%), #334155 var(--val, 0%), #334155 100%);
+      outline: none;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+    }
+    .time-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #3b82f6;
+      border: 2px solid #1e40af;
+      cursor: pointer;
+      box-shadow: 0 0 0 3px #1e3a5f;
+    }
+    .time-slider::-moz-range-thumb {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #3b82f6;
+      border: 2px solid #1e40af;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -490,15 +518,22 @@ function App() {
       {/* Czas od picia */}
       <div className="card">
         <h2>Czas od ostatniego drinka</h2>
-        <div className="row">
-          <div className="field">
-            <label>Ile godzin temu skonczylem pic?</label>
-            <input
-              type="number" min="0" max="24" step="0.5"
-              value={drinkingHoursAgo}
-              onChange={e => setDrinkingHoursAgo(Number(e.target.value))}
-            />
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Ile godzin temu skonczylem pic?</span>
+          <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>
+            {drinkingHoursAgo === 0 ? 'Teraz' : formatHours(drinkingHoursAgo)}
+          </span>
+        </div>
+        <input
+          type="range" min="0" max="24" step="0.5"
+          value={drinkingHoursAgo}
+          onChange={e => setDrinkingHoursAgo(Number(e.target.value))}
+          className="time-slider"
+          style={{ '--val': `${(drinkingHoursAgo / 24) * 100}%` }}
+        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+          <span style={{ fontSize: '0.65rem', color: '#475569' }}>0h</span>
+          <span style={{ fontSize: '0.65rem', color: '#475569' }}>24h</span>
         </div>
       </div>
 
