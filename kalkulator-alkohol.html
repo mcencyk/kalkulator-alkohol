@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kalkulator Alkoholu</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #f8fafc;
+    }
+    .subtitle {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      margin-bottom: 28px;
+    }
+    .card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid #334155;
+    }
+    .card h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 120px;
+    }
+    label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    input, select {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #f1f5f9;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus {
+      border-color: #3b82f6;
+    }
+    .gender-btns {
+      display: flex;
+      gap: 8px;
+    }
+    .gender-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .gender-btn.active {
+      background: #1d4ed8;
+      border-color: #3b82f6;
+      color: #fff;
+    }
+    .drink-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .drink-row select {
+      flex: 2;
+    }
+    .drink-row input {
+      flex: 1;
+      min-width: 60px;
+    }
+    .btn-remove {
+      background: #7f1d1d;
+      border: none;
+      border-radius: 6px;
+      color: #fca5a5;
+      cursor: pointer;
+      padding: 10px 12px;
+      font-size: 0.875rem;
+      transition: background 0.15s;
+    }
+    .btn-remove:hover { background: #991b1b; }
+    .btn-add {
+      background: #1e3a5f;
+      border: 1px solid #2563eb;
+      border-radius: 8px;
+      color: #93c5fd;
+      cursor: pointer;
+      padding: 9px 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-top: 4px;
+      transition: background 0.15s;
+    }
+    .btn-add:hover { background: #1d4ed8; color: #fff; }
+
+    .result-panel {
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+      border: 2px solid;
+      text-align: center;
+    }
+    .result-panel.safe { border-color: #16a34a; background: #14532d22; }
+    .result-panel.warn { border-color: #d97706; background: #92400e22; }
+    .result-panel.danger { border-color: #dc2626; background: #7f1d1d22; }
+
+    .bac-value {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .safe .bac-value { color: #4ade80; }
+    .warn .bac-value { color: #fbbf24; }
+    .danger .bac-value { color: #f87171; }
+
+    .bac-label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 12px;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 99px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .safe .status-badge { background: #16a34a; color: #fff; }
+    .warn .status-badge { background: #d97706; color: #fff; }
+    .danger .status-badge { background: #dc2626; color: #fff; }
+
+    .drive-info {
+      font-size: 1rem;
+      color: #e2e8f0;
+    }
+    .drive-time {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-top: 4px;
+    }
+
+    .timeline {
+      margin-top: 16px;
+    }
+    .timeline h3 {
+      font-size: 0.8rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+    .tl-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+    }
+    .tl-hour {
+      color: #94a3b8;
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .tl-bar-wrap {
+      flex: 1;
+      background: #0f172a;
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .tl-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+    .tl-val {
+      width: 48px;
+      text-align: right;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    .disclaimer {
+      font-size: 0.75rem;
+      color: #475569;
+      text-align: center;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 480px) {
+      .row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const DRINKS = [
+  { label: 'Piwo 500ml (5%)',     ml: 500,  perc: 5   },
+  { label: 'Piwo 330ml (5%)',     ml: 330,  perc: 5   },
+  { label: 'Piwo mocne 500ml (8%)', ml: 500, perc: 8  },
+  { label: 'Wino 150ml (12%)',    ml: 150,  perc: 12  },
+  { label: 'Wino 200ml (13%)',    ml: 200,  perc: 13  },
+  { label: 'Shot wódki 50ml (40%)', ml: 50, perc: 40  },
+  { label: 'Whisky 50ml (40%)',   ml: 50,   perc: 40  },
+  { label: 'Szampan 150ml (11%)', ml: 150,  perc: 11  },
+  { label: 'Nalewka 50ml (35%)', ml: 50,   perc: 35  },
+  { label: 'Inne (wpisz sam)',    ml: 0,    perc: 0, custom: true },
+];
+
+const ELIMINATION = 0.15; // ‰ per hour (Widmark typical)
+const LEGAL_LIMIT = 0.2;  // ‰ - Poland (driving prohibited above this)
+const DUI_LIMIT   = 0.5;  // ‰ - Poland (criminal offence above this)
+
+function calcAlcoholGrams(ml, perc) {
+  return ml * (perc / 100) * 0.789;
+}
+
+function calcBAC(grams, weightKg, gender) {
+  const r = gender === 'male' ? 0.7 : 0.6;
+  return grams / (weightKg * r);
+}
+
+function fmt(bac) {
+  return bac.toFixed(2) + ' ‰';
+}
+
+function formatHours(h) {
+  if (h <= 0) return 'Teraz';
+  const hh = Math.floor(h);
+  const mm = Math.round((h - hh) * 60);
+  if (hh === 0) return `${mm} min`;
+  if (mm === 0) return `${hh} godz.`;
+  return `${hh} godz. ${mm} min`;
+}
+
+function barColor(bac) {
+  if (bac <= LEGAL_LIMIT) return '#4ade80';
+  if (bac <= DUI_LIMIT) return '#fbbf24';
+  return '#f87171';
+}
+
+let drinkId = 0;
+
+function App() {
+  const [weight, setWeight] = React.useState(75);
+  const [gender, setGender] = React.useState('male');
+  const [drinkingHoursAgo, setDrinkingHoursAgo] = React.useState(0);
+  const [food, setFood] = React.useState('none');
+  const [drinks, setDrinks] = React.useState([
+    { id: drinkId++, drinkIdx: 0, qty: 1, customMl: 500, customPerc: 5 }
+  ]);
+
+  const totalGrams = drinks.reduce((sum, d) => {
+    const preset = DRINKS[d.drinkIdx];
+    if (preset.custom) {
+      return sum + calcAlcoholGrams(d.customMl, d.customPerc) * d.qty;
+    }
+    return sum + calcAlcoholGrams(preset.ml, preset.perc) * d.qty;
+  }, 0);
+
+  const foodFactor = { none: 1.0, snack: 0.85, meal: 0.70, heavy: 0.60 }[food];
+  const bac0 = weight > 0 ? calcBAC(totalGrams, weight, gender) * foodFactor : 0;
+  const currentBAC = Math.max(0, bac0 - ELIMINATION * drinkingHoursAgo);
+
+  const hoursToLegal = currentBAC > LEGAL_LIMIT
+    ? (currentBAC - LEGAL_LIMIT) / ELIMINATION
+    : 0;
+
+  const driveTime = new Date();
+  driveTime.setMinutes(driveTime.getMinutes() + Math.round(hoursToLegal * 60));
+
+  let panelClass = 'safe';
+  let statusText = 'Mozesz prowadzic';
+  if (currentBAC > DUI_LIMIT) { panelClass = 'danger'; statusText = 'Stan nietrzezwosci!'; }
+  else if (currentBAC > LEGAL_LIMIT) { panelClass = 'warn'; statusText = 'Nie mozna prowadzic'; }
+
+  const maxBAC = Math.max(bac0, 0.5);
+  const timelineHours = Math.ceil(bac0 / ELIMINATION) + 1;
+  const timelinePoints = Array.from({ length: Math.min(timelineHours, 24) + 1 }, (_, i) => ({
+    h: i,
+    bac: Math.max(0, bac0 - ELIMINATION * (drinkingHoursAgo + i)),
+  }));
+
+  function addDrink() {
+    setDrinks(d => [...d, { id: drinkId++, drinkIdx: 0, qty: 1, customMl: 500, customPerc: 5 }]);
+  }
+  function removeDrink(id) {
+    setDrinks(d => d.filter(x => x.id !== id));
+  }
+  function updateDrink(id, field, val) {
+    setDrinks(d => d.map(x => x.id === id ? { ...x, [field]: val } : x));
+  }
+
+  return (
+    <div className="container">
+      <h1>Kalkulator Alkoholu</h1>
+      <p className="subtitle">Kiedy moge prowadzic samochod? (prawo polskie)</p>
+
+      {/* Dane osoby */}
+      <div className="card">
+        <h2>Dane osoby</h2>
+        <div className="row">
+          <div className="field">
+            <label>Waga (kg)</label>
+            <input
+              type="number" min="30" max="250"
+              value={weight}
+              onChange={e => setWeight(Number(e.target.value))}
+            />
+          </div>
+          <div className="field">
+            <label>Plec</label>
+            <div className="gender-btns">
+              <button className={`gender-btn ${gender === 'male' ? 'active' : ''}`}
+                onClick={() => setGender('male')}>Mezczyzna</button>
+              <button className={`gender-btn ${gender === 'female' ? 'active' : ''}`}
+                onClick={() => setGender('female')}>Kobieta</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Napoje */}
+      <div className="card">
+        <h2>Wypite napoje</h2>
+        {drinks.map(d => {
+          const preset = DRINKS[d.drinkIdx];
+          return (
+            <div key={d.id} className="drink-row">
+              <select value={d.drinkIdx} onChange={e => updateDrink(d.id, 'drinkIdx', Number(e.target.value))}>
+                {DRINKS.map((dr, i) => <option key={i} value={i}>{dr.label}</option>)}
+              </select>
+              {preset.custom && (
+                <>
+                  <input type="number" placeholder="ml" min="0" value={d.customMl}
+                    onChange={e => updateDrink(d.id, 'customMl', Number(e.target.value))}
+                    style={{ maxWidth: 70 }} />
+                  <input type="number" placeholder="%" min="0" max="100" value={d.customPerc}
+                    onChange={e => updateDrink(d.id, 'customPerc', Number(e.target.value))}
+                    style={{ maxWidth: 60 }} />
+                </>
+              )}
+              <input type="number" min="1" max="20" value={d.qty}
+                onChange={e => updateDrink(d.id, 'qty', Number(e.target.value))}
+                style={{ maxWidth: 64 }} />
+              <button className="btn-remove" onClick={() => removeDrink(d.id)}>X</button>
+            </div>
+          );
+        })}
+        <button className="btn-add" onClick={addDrink}>+ Dodaj napoj</button>
+      </div>
+
+      {/* Jedzenie */}
+      <div className="card">
+        <h2>Jedzenie</h2>
+        <div className="gender-btns" style={{ flexWrap: 'wrap' }}>
+          {[
+            { val: 'none',  label: 'Pusty zoladek', desc: '100%' },
+            { val: 'snack', label: 'Przekaska',      desc: '-15%' },
+            { val: 'meal',  label: 'Normalny posilek', desc: '-30%' },
+            { val: 'heavy', label: 'Obfity posilek', desc: '-40%' },
+          ].map(f => (
+            <button
+              key={f.val}
+              className={`gender-btn ${food === f.val ? 'active' : ''}`}
+              style={{ minWidth: 120 }}
+              onClick={() => setFood(f.val)}
+            >
+              {f.label}
+              <span style={{ display: 'block', fontSize: '0.7rem', opacity: 0.7, marginTop: 2 }}>{f.desc} wchłaniania</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Czas od picia */}
+      <div className="card">
+        <h2>Czas od ostatniego drinka</h2>
+        <div className="row">
+          <div className="field">
+            <label>Ile godzin temu skonczylem pic?</label>
+            <input
+              type="number" min="0" max="24" step="0.5"
+              value={drinkingHoursAgo}
+              onChange={e => setDrinkingHoursAgo(Number(e.target.value))}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Wynik */}
+      <div className={`result-panel ${panelClass}`}>
+        <div className="bac-value">{fmt(currentBAC)}</div>
+        <div className="bac-label">Szacowane stezenie alkoholu we krwi</div>
+        <div className="status-badge">{statusText}</div>
+        {currentBAC > LEGAL_LIMIT ? (
+          <div>
+            <div className="drive-info">Mozesz prowadzic za:</div>
+            <div className="drive-time">{formatHours(hoursToLegal)}</div>
+            <div className="drive-info" style={{ fontSize: '0.8rem', marginTop: 6, color: '#94a3b8' }}>
+              ok. {driveTime.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          </div>
+        ) : (
+          <div className="drive-info" style={{ color: '#4ade80' }}>
+            Stezenie ponizej limitu 0,2 ‰
+          </div>
+        )}
+
+        {/* Timeline */}
+        {bac0 > 0 && (
+          <div className="timeline">
+            <h3>Spodek stezenia od teraz</h3>
+            {timelinePoints.map(({ h, bac }) => (
+              <div className="tl-row" key={h}>
+                <span className="tl-hour">+{h}h</span>
+                <div className="tl-bar-wrap">
+                  <div className="tl-bar" style={{
+                    width: `${Math.min(100, (bac / Math.max(maxBAC, 0.01)) * 100)}%`,
+                    background: barColor(bac),
+                  }} />
+                </div>
+                <span className="tl-val">{bac > 0 ? bac.toFixed(2) : '0.00'} ‰</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <p className="disclaimer">
+        Obliczenia oparte na wzorze Widmarka (wspolczynnik eliminacji 0,15 ‰/h).<br/>
+        Wynik jest szacunkowy i moze sie roznic w zaleznosci od wielu czynnikow.<br/>
+        <strong>Limit w Polsce: 0,2 ‰ (prawo jazdy), 0,5 ‰ (przestepstwo).</strong><br/>
+        Nie polegaj na tym kalkulatorze przy decyzji o prowadzeniu pojazdu.
+      </p>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
