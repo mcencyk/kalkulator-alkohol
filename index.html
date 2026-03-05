@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kalkulator Alkoholu</title>
+  <title>Kalkulator spożycia</title>
   <link rel="icon" type="image/svg+xml" href="logo.svg" />
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -252,7 +252,7 @@
     }
 
     .disclaimer {
-      font-size: 0.75rem;
+      font-size: 0.62rem;
       color: #475569;
       text-align: center;
       margin-top: 8px;
@@ -332,6 +332,17 @@ const DRINKS = [
   { label: 'Własny',     sub: 'wpisz sam',   ml: 0,   perc: 0,  emoji: '✏️', custom: true },
 ];
 
+const DRUGS = [
+  { label: 'Marihuana',     sub: 'THC',        emoji: '🌿', impairH: 5,  detectH: 12 },
+  { label: 'Kokaina',       sub: 'cocaine',    emoji: '❄️', impairH: 2,  detectH: 8  },
+  { label: 'Amfetamina',    sub: 'speed',      emoji: '💊', impairH: 10, detectH: 48 },
+  { label: 'MDMA',          sub: 'ecstasy',    emoji: '🔵', impairH: 6,  detectH: 36 },
+  { label: 'Heroina',       sub: 'opioid',     emoji: '💉', impairH: 5,  detectH: 24 },
+  { label: 'Benzo',         sub: 'diazepam',   emoji: '🟡', impairH: 8,  detectH: 72 },
+  { label: 'LSD',           sub: 'kwas',       emoji: '🎨', impairH: 10, detectH: 12 },
+  { label: 'Ketamina',      sub: 'ket',        emoji: '🧪', impairH: 3,  detectH: 6  },
+];
+
 const ELIMINATION = 0.15; // ‰ per hour (Widmark typical)
 const LEGAL_LIMIT = 0.2;  // ‰ - Poland (driving prohibited above this)
 const DUI_LIMIT   = 0.5;  // ‰ - Poland (criminal offence above this)
@@ -372,6 +383,8 @@ function App() {
   const [drinkCounts, setDrinkCounts] = React.useState({});
   const [customMl, setCustomMl] = React.useState(500);
   const [customPerc, setCustomPerc] = React.useState(5);
+  const [selectedDrugs, setSelectedDrugs] = React.useState(new Set());
+  const [drugHoursAgo, setDrugHoursAgo] = React.useState(0);
 
   const customIdx = DRINKS.length - 1;
 
@@ -408,6 +421,15 @@ function App() {
   let statusText = 'Mozesz prowadzic';
   if (currentBAC > DUI_LIMIT) { panelClass = 'danger'; statusText = 'Stan nietrzezwosci!'; }
   else if (currentBAC > LEGAL_LIMIT) { panelClass = 'warn'; statusText = 'Nie mozna prowadzic'; }
+  if (drugsActive) { panelClass = 'danger'; statusText = 'Narkotyki — ZAKAZ!'; }
+
+  const drugsActive = selectedDrugs.size > 0;
+  const drugImpairRemaining = drugsActive
+    ? Math.max(...[...selectedDrugs].map(i => Math.max(0, DRUGS[i].impairH - drugHoursAgo)))
+    : 0;
+  const drugDetectRemaining = drugsActive
+    ? Math.max(...[...selectedDrugs].map(i => Math.max(0, DRUGS[i].detectH - drugHoursAgo)))
+    : 0;
 
   const maxBAC = Math.max(bac0, 0.5);
   const timelineHours = Math.ceil(bac0 / ELIMINATION) + 1;
@@ -425,7 +447,7 @@ function App() {
           <path id="logo-gear" d="M19.697 14.2308C19.452 13.4958 18.7641 13 17.9893 13H16.9841C16.2093 13 15.5214 13.4958 15.2764 14.2308L14.9311 15.2667C14.2018 15.5437 13.5292 15.9357 12.9354 16.4207L11.8635 16.2013C11.1044 16.046 10.3311 16.3938 9.94376 17.0648L9.44113 17.9354C9.05374 18.6063 9.13917 19.4499 9.65321 20.0296L10.3784 20.8475C10.3181 21.2227 10.2867 21.6077 10.2867 22C10.2867 22.3923 10.3181 22.7773 10.3784 23.1525L9.65321 23.9704C9.13917 24.5501 9.05374 25.3937 9.44113 26.0646L9.94376 26.9352C10.3311 27.6062 11.1044 27.954 11.8635 27.7987L12.9354 27.5793C13.5292 28.0643 14.2018 28.4563 14.9311 28.7333L15.2764 29.7692C15.5214 30.5042 16.2093 31 16.9841 31H17.9893C18.7641 31 19.452 30.5042 19.697 29.7692L20.0423 28.7333C20.7715 28.4563 21.4441 28.0643 22.0379 27.5794L23.1099 27.7988C23.869 27.9541 24.6422 27.6063 25.0296 26.9354L25.5323 26.0648C25.9196 25.3938 25.8342 24.5502 25.3202 23.9705L24.5949 23.1526C24.6553 22.7773 24.6867 22.3923 24.6867 22C24.6867 21.6077 24.6553 21.2227 24.5949 20.8475L25.3202 20.0296C25.8342 19.4499 25.9196 18.6063 25.5323 17.9354L25.0296 17.0648C24.6422 16.3938 23.869 16.046 23.1099 16.2013L22.038 16.4207C21.4442 15.9357 20.7716 15.5437 20.0423 15.2667L19.697 14.2308Z" stroke="#CCDFE9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         <div>
-          <h1>Kalkulator Alkoholu</h1>
+          <h1>Kalkulator spożycia</h1>
           <p className="subtitle">Kiedy moge prowadzic samochod? (prawo polskie)</p>
         </div>
       </div>
@@ -437,29 +459,28 @@ function App() {
         <h2>Dane osoby</h2>
         <div className="row">
           <div className="field">
+            <label>Płeć</label>
+            <div className="gender-btns">
+              {[
+                { val: 'male',   label: 'Mężczyzna' },
+                { val: 'female', label: 'Kobieta' },
+              ].map(g => (
+                <button key={g.val}
+                  className={`gender-btn ${gender === g.val ? 'active' : ''}`}
+                  onClick={() => setGender(g.val)}
+                >
+                  {g.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="field">
             <label>Waga (kg)</label>
             <input
               type="number" min="30" max="250"
               value={weight}
               onChange={e => setWeight(Number(e.target.value))}
             />
-          </div>
-          <div className="field">
-            <label>Plec</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {[
-                { val: 'male',   emoji: '👨', label: 'Mężczyzna' },
-                { val: 'female', emoji: '👩', label: 'Kobieta' },
-              ].map(g => (
-                <div key={g.val}
-                  className={`drink-card ${gender === g.val ? 'active' : ''}`}
-                  onClick={() => setGender(g.val)}
-                >
-                  <span className="drink-emoji">{g.emoji}</span>
-                  <span className="drink-name">{g.label}</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
@@ -498,6 +519,69 @@ function App() {
               style={{ maxWidth: 70 }} />
           </div>
         )}
+        <div style={{ marginTop: 16, borderTop: '1px solid #334155', paddingTop: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Ile godzin temu skończyłem pić?</span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>
+              {drinkingHoursAgo === 0 ? 'Teraz' : formatHours(drinkingHoursAgo)}
+            </span>
+          </div>
+          <input
+            type="range" min="0" max="24" step="0.5"
+            value={drinkingHoursAgo}
+            onChange={e => setDrinkingHoursAgo(Number(e.target.value))}
+            className="time-slider"
+            style={{ '--val': `${(drinkingHoursAgo / 24) * 100}%` }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+            <span style={{ fontSize: '0.65rem', color: '#475569' }}>0h</span>
+            <span style={{ fontSize: '0.65rem', color: '#475569' }}>24h</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Narkotyki */}
+      <div className="card">
+        <h2>Zażyte substancje</h2>
+        <div style={{ background: '#7f1d1d33', border: '1px solid #dc262655', borderRadius: 8, padding: '8px 12px', marginBottom: 14, fontSize: '0.78rem', color: '#fca5a5', lineHeight: 1.5 }}>
+          ⚠️ W Polsce jazda pod wpływem jakichkolwiek narkotyków jest zawsze przestępstwem (art. 178a KK), niezależnie od ilości.
+        </div>
+        <div className="drink-grid">
+          {DRUGS.map((drug, i) => (
+            <div
+              key={i}
+              className={`drink-card ${selectedDrugs.has(i) ? 'active' : ''}`}
+              onClick={() => setSelectedDrugs(prev => {
+                const next = new Set(prev);
+                next.has(i) ? next.delete(i) : next.add(i);
+                return next;
+              })}
+            >
+              <span className="drink-emoji">{drug.emoji}</span>
+              <span className="drink-name">{drug.label}</span>
+              <span className="drink-sub">{drug.sub}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 16, borderTop: '1px solid #334155', paddingTop: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Ile godzin temu zażyłeś?</span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>
+              {drugHoursAgo === 0 ? 'Teraz' : formatHours(drugHoursAgo)}
+            </span>
+          </div>
+          <input
+            type="range" min="0" max="96" step="0.5"
+            value={drugHoursAgo}
+            onChange={e => setDrugHoursAgo(Number(e.target.value))}
+            className="time-slider"
+            style={{ '--val': `${(drugHoursAgo / 96) * 100}%` }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+            <span style={{ fontSize: '0.65rem', color: '#475569' }}>0h</span>
+            <span style={{ fontSize: '0.65rem', color: '#475569' }}>96h</span>
+          </div>
+        </div>
       </div>
 
       {/* Jedzenie */}
@@ -523,28 +607,6 @@ function App() {
         </div>
       </div>
 
-      {/* Czas od picia */}
-      <div className="card">
-        <h2>Czas od ostatniego drinka</h2>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Ile godzin temu skonczylem pic?</span>
-          <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9' }}>
-            {drinkingHoursAgo === 0 ? 'Teraz' : formatHours(drinkingHoursAgo)}
-          </span>
-        </div>
-        <input
-          type="range" min="0" max="24" step="0.5"
-          value={drinkingHoursAgo}
-          onChange={e => setDrinkingHoursAgo(Number(e.target.value))}
-          className="time-slider"
-          style={{ '--val': `${(drinkingHoursAgo / 24) * 100}%` }}
-        />
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-          <span style={{ fontSize: '0.65rem', color: '#475569' }}>0h</span>
-          <span style={{ fontSize: '0.65rem', color: '#475569' }}>24h</span>
-        </div>
-      </div>
-
       </div>{/* end app-inputs */}
       <div className="app-result">
       {/* Wynik */}
@@ -563,6 +625,32 @@ function App() {
         ) : (
           <div className="drive-info" style={{ color: '#4ade80' }}>
             Stezenie ponizej limitu 0,2 ‰
+          </div>
+        )}
+
+        {/* Drug result */}
+        {drugsActive && (
+          <div style={{ marginTop: 12, padding: '12px', background: '#7f1d1d33', borderRadius: 8, textAlign: 'left', fontSize: '0.82rem' }}>
+            <div style={{ fontWeight: 700, color: '#f87171', marginBottom: 8, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+              {[...selectedDrugs].map(i => (
+                <span key={i} style={{ background: '#7f1d1d55', borderRadius: 6, padding: '2px 7px' }}>{DRUGS[i].emoji} {DRUGS[i].label}</span>
+              ))}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ color: '#94a3b8' }}>Szacowane upośledzenie:</span>
+              <span style={{ color: drugImpairRemaining > 0 ? '#f87171' : '#4ade80', fontWeight: 600 }}>
+                {drugImpairRemaining > 0 ? `jeszcze ${formatHours(drugImpairRemaining)}` : 'minęło'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#94a3b8' }}>Wykrywalność we krwi:</span>
+              <span style={{ color: drugDetectRemaining > 0 ? '#fbbf24' : '#4ade80', fontWeight: 600 }}>
+                {drugDetectRemaining > 0 ? `jeszcze ${formatHours(drugDetectRemaining)}` : 'poniżej progu'}
+              </span>
+            </div>
+            <div style={{ marginTop: 8, fontSize: '0.72rem', color: '#64748b', lineHeight: 1.4 }}>
+              Czasy szacunkowe. W Polsce jazda po narkotykach jest zawsze nielegalna.
+            </div>
           </div>
         )}
 
@@ -586,15 +674,14 @@ function App() {
         )}
       </div>
 
-      </div>{/* end app-result */}
-      </div>{/* end app-layout */}
-
-      <p className="disclaimer">
+      <p className="disclaimer" style={{ marginTop: 12 }}>
         Obliczenia oparte na wzorze Widmarka (wspolczynnik eliminacji 0,15 ‰/h).<br/>
         Wynik jest szacunkowy i moze sie roznic w zaleznosci od wielu czynnikow.<br/>
         <strong>Limit w Polsce: 0,2 ‰ (prawo jazdy), 0,5 ‰ (przestepstwo).</strong><br/>
         Nie polegaj na tym kalkulatorze przy decyzji o prowadzeniu pojazdu.
       </p>
+      </div>{/* end app-result */}
+      </div>{/* end app-layout */}
     </div>
   );
 }
