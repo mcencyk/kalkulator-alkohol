@@ -29,7 +29,17 @@
       "Bash(git commit -m \"Align logo and title horizontally\")",
       "Bash(git commit -m \"Replace drink dropdowns with icon card grid\")",
       "Bash(git commit -m \"Make result panel sticky side column\")",
-      "Bash(git commit -m \"Replace time input with styled range slider\")"
+      "Bash(git commit -m \"Replace time input with styled range slider\")",
+      "Bash(npx react-grab@latest)",
+      "Bash(curl -sS https://webi.sh/node)",
+      "Bash(node --version)",
+      "Bash(npm create vite@latest . -- --template react)",
+      "Bash(npm create vite@latest app -- --template react)",
+      "Bash(npm install)",
+      "Bash(npx react-grab@latest init)",
+      "Bash(npm run dev)",
+      "Bash(mv /Users/mateuszcencyk/Projekty/Code /Users/mateuszcencyk/Projekty/_tmp_kalkulator)",
+      "Bash(mv /Users/mateuszcencyk/Projekty/_tmp_kalkulator /Users/mateuszcencyk/Projekty/Code/Kalkulator)"
     ]
   }
 }

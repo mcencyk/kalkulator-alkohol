@@ -25,7 +25,7 @@ const DRUGS = [
   { label: 'Ketamina',   sub: 'ket',      emoji: '🧪', impairH: 3,  detectH: 6  },
 ];
 
-const ELIMINATION = 0.15;
+const ELIMINATION = 0.17;
 const LEGAL_LIMIT = 0.2;
 const DUI_LIMIT   = 0.5;
 
